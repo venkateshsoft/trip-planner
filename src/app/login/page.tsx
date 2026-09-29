@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeReturnPath } from "@/components/auth/client-fetch";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,18 +13,25 @@ export default function LoginPage() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ token }),
-    });
-    const result = await response.json();
-    if (!response.ok) {
-      setError(result.error ?? "Could not sign in");
-      return;
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setError(result.error ?? "Could not sign in");
+        return;
+      }
+      setToken("");
+      const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+      router.push(safeReturnPath(returnTo));
+      router.refresh();
+    } catch {
+      setError("Could not reach the sign-in service. Try again.");
     }
-    router.push("/");
-    router.refresh();
   }
 
   return (
