@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+coverage/
+.env
+.env.*
+!.env.example
+.envrc
+.vercel/
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
+prisma/dev.db
+prisma/dev.db-journal
+
