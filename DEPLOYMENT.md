@@ -9,7 +9,7 @@ Create an empty repository named `trip-planner` under the intended GitHub accoun
 The included GitHub Actions workflow runs:
 
 ```text
-npm ci
+npm install --no-audit --no-fund
 npm run lint
 npm test
 npm run build
@@ -52,9 +52,10 @@ PROVIDER_RATE_LIMIT_PER_MINUTE
 
 ## 4. Smoke test
 
-1. Create a trip at `/trips/new`.
-2. Open the trip workspace.
-3. Search for attractions and select several results.
-4. Generate the itinerary.
-5. Reorder or remove a stop, then regenerate.
+1. Open `/login` and sign in with `APP_API_TOKEN`.
+2. Create a trip at `/trips/new` using a city/state/country or Google Maps-style location.
+3. Confirm the normalized destination appears in the trip workspace.
+4. Search for attractions and select several results.
+5. Generate the itinerary.
+6. Reorder or remove a stop, then regenerate.
 
