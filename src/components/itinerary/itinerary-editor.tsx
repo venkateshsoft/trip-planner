@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { fetchWithSession } from "@/components/auth/client-fetch";
 
 type Stop = {
   id: string;
@@ -56,14 +57,14 @@ export default function ItineraryEditor({
     endpoint = `/api/itineraries/${itinerary.id}`,
   ) {
     setMessage("");
-    const response = await fetch(endpoint, {
+    const response = await fetchWithSession(endpoint, {
       method: endpoint.includes("regenerate") ? "POST" : "PATCH",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
     });
-    const result = await response.json();
+    const result = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setMessage(result.error ?? "Could not update itinerary");
+      if (response.status !== 401) setMessage(result.error ?? "Could not update itinerary");
       return false;
     }
     setItinerary(result.itinerary);
