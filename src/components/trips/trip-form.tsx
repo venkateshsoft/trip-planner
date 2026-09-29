@@ -60,21 +60,26 @@ export default function TripForm({
         .map((item) => item.trim())
         .filter(Boolean),
     };
-    const response = await fetch(
-      tripId ? `/api/trips/${tripId}` : "/api/trips",
-      {
-        method: tripId ? "PATCH" : "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
-      },
-    );
-    const result = await response.json();
-    setSaving(false);
-    if (!response.ok) {
-      setError(result.error ?? "Could not create trip");
-      return;
+    try {
+      const response = await fetch(
+        tripId ? `/api/trips/${tripId}` : "/api/trips",
+        {
+          method: tripId ? "PATCH" : "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setError(result.error ?? "Could not save trip. Check service readiness.");
+        return;
+      }
+      router.push(`/trips/${result.trip.id}`);
+    } catch {
+      setError("Could not reach the trip service. Check your connection and try again.");
+    } finally {
+      setSaving(false);
     }
-    router.push(`/trips/${result.trip.id}`);
   }
 
   return (
