@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchWithSession } from "@/components/auth/client-fetch";
 
 const initialState = {
   city: "",
@@ -61,7 +62,7 @@ export default function TripForm({
         .filter(Boolean),
     };
     try {
-      const response = await fetch(
+      const response = await fetchWithSession(
         tripId ? `/api/trips/${tripId}` : "/api/trips",
         {
           method: tripId ? "PATCH" : "POST",
@@ -71,6 +72,10 @@ export default function TripForm({
       );
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
+        if (response.status === 401) {
+          setError("Your session is missing. Redirecting to sign in...");
+          return;
+        }
         setError(result.error ?? "Could not save trip. Check service readiness.");
         return;
       }
