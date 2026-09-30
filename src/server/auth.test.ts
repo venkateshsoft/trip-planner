@@ -11,19 +11,19 @@ afterEach(() => vi.unstubAllEnvs());
 describe("production session authentication", () => {
   it("creates a session cookie that authorizes planner API requests", async () => {
     vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("APP_API_TOKEN", "demo-secret");
+    vi.stubEnv("APP_API_TOKEN", "demo secret+encoded");
 
     const response = await login(
       new Request("http://localhost/api/auth/login", {
         method: "POST",
-        body: JSON.stringify({ token: "demo-secret" }),
+        body: JSON.stringify({ token: "demo secret+encoded" }),
         headers: { "content-type": "application/json" },
       }),
     );
 
     expect(response.status).toBe(200);
     const setCookie = response.headers.get("set-cookie");
-    expect(setCookie).toContain(`${authCookieName}=demo-secret`);
+    expect(setCookie).toContain(`${authCookieName}=demo%20secret%2Bencoded`);
     expect(
       isAuthorized(
         new Request("http://localhost/api/trips", {
