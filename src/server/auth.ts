@@ -13,13 +13,30 @@ export function isAuthorized(request: Request) {
   const bearer = authorization?.startsWith("Bearer ")
     ? authorization.slice(7)
     : undefined;
-  const cookie = request.headers
+  const requestWithCookies = request as Request & {
+    cookies?: { get: (name: string) => { value: string } | undefined };
+  };
+  const parsedCookie = requestWithCookies.cookies?.get(authCookieName)?.value;
+  const headerCookie = request.headers
     .get("cookie")
     ?.split(";")
     .map((item) => item.trim())
     .find((item) => item.startsWith(`${authCookieName}=`))
     ?.slice(authCookieName.length + 1);
+  const cookie = parsedCookie ?? decodeCookieValue(headerCookie);
   return bearer === token || cookie === token;
+}
+
+function decodeCookieValue(value: string | undefined) {
+  if (!value) return undefined;
+  const unquoted = value.startsWith('"') && value.endsWith('"')
+    ? value.slice(1, -1)
+    : value;
+  try {
+    return decodeURIComponent(unquoted);
+  } catch {
+    return unquoted;
+  }
 }
 
 export function unauthorizedResponse() {
